@@ -20,18 +20,30 @@ import android.os.Handler
 import android.os.Looper
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Data manager class that handles data manipulation between the database and the UI.
  */
-class LoggerLocalDataSource(private val logDao: LogDao) {
+
+/**
+ * 생성자에 @Inject달아 Hilt에 LoggerLocalDataSource의 인스턴스 제공 방법 알려주기
+ * 생성자에서 매개변수로 들어가는 LogDao는 인터페이스라 **모듈**(@Module과 @InstallIn이 달린 클래스)을 사용하여 Hilt에 알려줘야 함!
+ */
+
+/**
+ * 모듈은 di패키지에 DatabaseModule.kt 확인!
+ */
+
+class LoggerLocalDataSource @Inject constructor (private val logDao: LogDao): LoggerDataSource {
 
     private val executorService: ExecutorService = Executors.newFixedThreadPool(4)
     private val mainThreadHandler by lazy {
         Handler(Looper.getMainLooper())
     }
 
-    fun addLog(msg: String) {
+    override fun addLog(msg: String) {
         executorService.execute {
             logDao.insertAll(
                 Log(
@@ -42,14 +54,14 @@ class LoggerLocalDataSource(private val logDao: LogDao) {
         }
     }
 
-    fun getAllLogs(callback: (List<Log>) -> Unit) {
+    override fun getAllLogs(callback: (List<Log>) -> Unit) {
         executorService.execute {
             val logs = logDao.getAll()
             mainThreadHandler.post { callback(logs) }
         }
     }
 
-    fun removeLogs() {
+    override fun removeLogs() {
         executorService.execute {
             logDao.nukeTable()
         }

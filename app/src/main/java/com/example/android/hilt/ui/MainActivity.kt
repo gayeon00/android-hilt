@@ -22,21 +22,32 @@ import com.example.android.hilt.LogApplication
 import com.example.android.hilt.R
 import com.example.android.hilt.navigator.AppNavigator
 import com.example.android.hilt.navigator.Screens
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * Main activity of the application.
  *
  * Container for the Buttons & Logs fragments. This activity simply tracks clicks on buttons.
  */
+@AndroidEntryPoint
+//Fragment를 호스팅 하는 Activity를 Hilt에 알려주기
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var navigator: AppNavigator
+    @Inject lateinit var navigator: AppNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        /** ServiceLocator에서 AppNavigator 인스턴스를 가져옵니다.
+         * AppNavigator는 인터페이스이므로 생성자 삽입을 사용할 수 없습니다.
+         * 인터페이스에 사용할 구현을 Hilt에 알리려면 Hilt 모듈 내 함수에 @Binds 주석을 사용
+         */
+/*
+        //@Binds 주석은 추상 함수에 달아야 하고, 이 추상함수는 구현을 제공하려는 인터페이스를 반환(예: AppNavigator)
         navigator = (applicationContext as LogApplication).serviceLocator.provideNavigator(this)
+*/
 
         if (savedInstanceState == null) {
             navigator.navigateTo(Screens.BUTTONS)
